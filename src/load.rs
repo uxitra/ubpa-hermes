@@ -20,6 +20,7 @@ pub struct UploadForm {
 
 /// Gets the post request from the html form with all atributes
 pub async fn load(MultipartForm(form): MultipartForm<UploadForm>) -> Result<impl Responder, Error> {
+    // Check if they arent files sended
     if form.files.is_empty() {
         println!("You should send files");
         return Ok(UploadTemplate {
@@ -27,6 +28,7 @@ pub async fn load(MultipartForm(form): MultipartForm<UploadForm>) -> Result<impl
         });
     }
 
+    // Count the given files
     let count = form.files.len();
 
     if count > 10 {
@@ -35,6 +37,7 @@ pub async fn load(MultipartForm(form): MultipartForm<UploadForm>) -> Result<impl
         });
     }
 
+    // Iterate over the files and check if they are valid
     for f in form.files {
         let filename = f.file_name.unwrap();
 
@@ -60,6 +63,7 @@ pub async fn load(MultipartForm(form): MultipartForm<UploadForm>) -> Result<impl
         }
     }
 
+    // Check the email format
     match form.email {
         Some(email) => {
             if email.is_empty() {
@@ -81,6 +85,7 @@ pub async fn load(MultipartForm(form): MultipartForm<UploadForm>) -> Result<impl
         }
     }
 
+    // Get the value of the checkbox
     let checkbox_value = form.checkbox.as_ref().map(|t| t.0 == "on").unwrap_or(false);
 
     if !checkbox_value {
@@ -89,5 +94,6 @@ pub async fn load(MultipartForm(form): MultipartForm<UploadForm>) -> Result<impl
         });
     }
 
+    // If succesfull return nothing
     Ok(UploadTemplate { error: "" })
 }
