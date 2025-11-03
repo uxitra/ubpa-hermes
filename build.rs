@@ -7,7 +7,7 @@ fn main() {
     // Run tailwind build command
     let status = Command::new("npx")
         .args([
-            "tailwindcss",
+            "@tailwindcss/cli",
             "-i",
             "./static/html/input.css",
             "-o",
