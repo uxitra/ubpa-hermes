@@ -6,7 +6,6 @@ use actix_multipart::form::bytes::Bytes;
 use actix_multipart::form::text::Text;
 use actix_web::Error;
 use actix_web::Responder;
-use actix_web::web;
 use sqlx::SqlitePool;
 
 #[derive(Debug, MultipartForm)]
@@ -23,7 +22,7 @@ pub struct UploadForm {
 /// Gets the post request from the html form with all atributes
 pub async fn load(
     MultipartForm(form): MultipartForm<UploadForm>,
-    pool: web::Data<SqlitePool>,
+    pool: actix_web::web::Data<SqlitePool>,
 ) -> Result<impl Responder, Error> {
     // Check if they arent files sended
     if form.files.is_empty() {
@@ -112,12 +111,15 @@ pub async fn load(
     let token = uuid::Uuid::new_v4();
     println!("{}", token);
 
-    sqlx::query("INSERT INTO tokens (email, token) VALUES (?, ?)")
-        .bind(email.unwrap().to_string())
+    let email = email.unwrap().to_string();
+
+    sqlx::query(r#"INSERT INTO users (key, value) VALUES (?, ?)"#)
         .bind(token.to_string())
-        .execute(pool.get_ref())
+        .bind(&email)
+        .execute(pool.as_ref())
         .await
         .unwrap();
+    println!("{}, {}", token, email);
 
     // If succesfull return nothing
     Ok(UploadTemplate {

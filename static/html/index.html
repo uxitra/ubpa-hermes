@@ -1,3 +1,4 @@
+<!--index.html (main)-->
 <!DOCTYPE html>
 <html>
 
@@ -16,12 +17,19 @@
     <h1 class="text-3xl font-bold underline">Hello world!</h1>-->
 
   <!--Most modern smartphones are size md so only sm wont work-->
+  <div id="login-screen"></div>
   <div id="token"></div>
 
-  <div id="error_message"></div>
+  <div id="error_message" class="fixed"></div>
 
   <div id="modal"></div>
 
+  <div class="fixed bg-blue-600 hover:bg-blue-700" hx-get="/login" hx-target="body" hx-swap="outerHTML"
+    hx-push-url="/login">
+    <button>Login</button>
+  </div>
+
+  <!--<button class="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">Login</button>-->
 
   <div class="h-screen flex items-center justify-end">
     <form hx-post="/load" enctype="multipart/form-data" hx-target="#error_message" class="bg-gray-50 p-8 

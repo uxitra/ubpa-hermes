@@ -1,0 +1,51 @@
+<!--login.html (template)-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="/html/output.css" rel="stylesheet" />
+    <script src="/js/htmx.min.js"></script>
+</head>
+
+<body>
+    <div class="h-screen w-screen bg-linear-to-br from-teal-700 to-teal-950 flex items-center justify-center">
+        <div class="h-[90vh] w-[90vw] bg-white rounded-xl shadow-lg flex items-start justify-start p-12 pt-16">
+            <div class="w-full max-w-2xl">
+                <!-- Header -->
+
+
+                <form class="w-3/4 flex flex-col space-y-6 mx-auto" hx-post="/view-status">
+                    <h1 class="text-6xl font-bold mb-12 text-gray-900 text-center">
+                        Login
+                    </h1>
+
+                    <br>
+
+                    <!-- Token Input -->
+                    <input type="text" placeholder="Token" name="token"
+                        class="px-6 py-5 text-lg bg-white border border-gray-200 mb-12 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent placeholder-gray-400" />
+
+                    <br>
+
+                    <!-- Email Input -->
+                    <input type="email" placeholder="Email" name="email"
+                        class="px-6 py-5 text-lg bg-white border border-gray-200 rounded-2xl mb-12 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent placeholder-gray-400" />
+
+                    <br>
+
+                    <!-- Login button -->
+                    <button type="submit"
+                        class="py-5 text-lg font-semibold text-white bg-linear-to-r mb-12 from-teal-700 to-teal-950 rounded-2xl transition delay-150 duration-300 ease-in-out hover:-translate-y-5 hover:scale-110 hover:bg-teal-950 shadow-lg">
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
