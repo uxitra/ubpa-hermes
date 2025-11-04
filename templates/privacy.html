@@ -1,0 +1,23 @@
+<div class="fixed inset-0 flex items-center justify-center bg-black/50 z-50" hx-get="/close-modal" hx-target="#modal"
+  hx-swap="innerHTML">
+  <div class="bg-white rounded-lg shadow-2xl w-11/12 max-w-md p-6 space-y-4" hx-on="click: event.stopPropagation()">
+    <h2 class="text-lg font-semibold text-center border-b pb-2">
+      Data Protection Agreement
+    </h2>
+
+    <p class="text-sm text-gray-700">
+      This is the data protection agreement. You can write your real privacy
+      policy text here.
+    </p>
+    <p class="text-sm text-gray-700">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi.
+    </p>
+
+    <div class="text-right border-t pt-2">
+      <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" hx-get="/close-modal"
+        hx-target="#modal" hx-swap="innerHTML">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

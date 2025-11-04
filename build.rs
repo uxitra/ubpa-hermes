@@ -4,7 +4,6 @@ fn main() {
     println!("cargo:rerun-if-changed=static/html/input.css");
     println!("cargo:rerun-if-changed=tailwind.config.js");
 
-
     // Run tailwind build command
     let status = Command::new("npx")
         .args([
