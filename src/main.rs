@@ -1,6 +1,7 @@
 mod check_email;
 mod check_pdf;
 mod close_popup;
+mod home;
 mod load;
 mod login;
 mod privacy;
@@ -8,6 +9,7 @@ mod templates;
 mod view_status;
 
 use crate::close_popup::close_modal;
+use crate::home::home;
 use crate::load::load;
 use crate::login::login;
 use crate::privacy::privacy;
@@ -89,6 +91,7 @@ async fn main() -> std::io::Result<()> {
             .route("/close-modal", web::get().to(close_modal))
             .route("/login", web::get().to(login))
             .route("/view-status", web::post().to(view_status))
+            .route("/home", web::get().to(home))
             .default_service(
                 web::get()
                     .to(|| async { fs::NamedFile::open_async("./static/html/index.html").await }),

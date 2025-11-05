@@ -6,7 +6,16 @@ use actix_multipart::form::bytes::Bytes;
 use actix_multipart::form::text::Text;
 use actix_web::Error;
 use actix_web::Responder;
+use lettre::Transport;
 use sqlx::SqlitePool;
+
+#[derive(serde::Deserialize)]
+struct EmailConfig {
+    email: String,
+    password: String,
+    subject: String,
+    email_content: String,
+}
 
 #[derive(Debug, MultipartForm)]
 /// Contains all the variables that are send to the backend from the html form
@@ -119,7 +128,33 @@ pub async fn load(
         .execute(pool.as_ref())
         .await
         .unwrap();
-    println!("{}, {}", token, email);
+    println!("{}, {}", token, &email);
+
+    let config_data = std::fs::read_to_string("./config.json")
+        .expect("Failed to read config.json please check if the file was suplied");
+    let config: EmailConfig = serde_json::from_str(&config_data).expect("Failed to parse JSON");
+
+    let lettre_email = lettre::Message::builder()
+        .from(config.email.parse().unwrap())
+        .to(email.parse().unwrap())
+        .subject(config.subject)
+        .body(config.email_content)
+        .unwrap();
+
+    let creds = lettre::transport::smtp::authentication::Credentials::new(
+        config.email.clone(),
+        config.password.clone(),
+    );
+
+    let mailer = lettre::SmtpTransport::relay("smtp.gmail.com")
+        .unwrap()
+        .credentials(creds)
+        .build();
+
+    match mailer.send(&lettre_email) {
+        Ok(_) => println!("Email sent successfully!"),
+        Err(e) => println!("Could not send email: {}", e),
+    }
 
     // If succesfull return nothing
     Ok(UploadTemplate {

@@ -1,4 +1,4 @@
-use actix_web::HttpResponse;
+use crate::templates::staus_template::StatusTemplate;
 use sqlx::SqlitePool;
 
 #[derive(serde::Deserialize, Debug)]
@@ -23,12 +23,17 @@ pub async fn view_status(
             actix_web::error::ErrorInternalServerError("Database error")
         })?;
 
+    println!("loaded and got data from DB");
+
     if row.is_some() {
         // Found
         println!("Found you");
-        return Ok(HttpResponse::Ok().finish());
+        Ok(StatusTemplate { error: "" })
     } else {
+        println!("Fake!!!!");
         // Not found — common case, just respond accordingly
-        return Ok(HttpResponse::Ok().finish());
+        Ok(StatusTemplate {
+            error: "User not found",
+        })
     }
 }

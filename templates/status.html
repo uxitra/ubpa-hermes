@@ -1,4 +1,6 @@
-<div>
-    <!--TODO: 1: Button go to main page, 2: Status of your application-->
-    <p>We Found you</p>
-</div>
+{% if error != "" %}
+<p>Error: {{ error }}</p>
+{% else %}
+<p>No Error we found you</p>
+
+{% endif %}
