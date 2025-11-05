@@ -1,7 +1,16 @@
-<div class="fixed bg-blue-600 hover:bg-blue-700" hx-get="/login" hx-target="#main-page" hx-swap="innerHTML"
-    hx-push-url="/login">
-    <button>Login</button>
+<div class="fixed top-20 left-4 flex flex-col gap-4" hx-get="/login_admin" hx-target="#main-page" hx-swap="innerHTML"
+    hx-push-url="/login_admin">
+    <div class="bg-green-600 hover:bg-green-700">
+        <button class="px-4 py-2">Login (Admin)</button>
+    </div>
+    <div class="bg-blue-600 hover:bg-blue-700" hx-get="/login" hx-target="#main-page" hx-swap="innerHTML"
+        hx-push-url="/login">
+        <button class="px-4 py-2">Login</button>
+    </div>
 </div>
+
+
+
 
 <div class="h-screen flex items-center justify-end">
     <form hx-post="/load" enctype="multipart/form-data" hx-target="#error_message" class="bg-gray-50 p-8 

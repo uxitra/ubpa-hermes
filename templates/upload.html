@@ -1,5 +1,21 @@
 {% if error != "" %}
-<p>Error: {{ error }}</p>
+<div class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+        <div class="bg-white rounded-lg shadow-2xl w-11/12 max-w-md p-6 space-y-4"
+                hx-on="click: event.stopPropagation()">
+                <h2 class="text-lg font-semibold text-center border-b pb-2">
+                        Error
+                </h2>
+
+                <p class="text-black">Token: {{ error }}</p>
+
+                <div class="text-right border-t pt-2">
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" hx-get="/close-modal"
+                                hx-target="#error_message" hx-swap="innerHTML">
+                                Close
+                        </button>
+                </div>
+        </div>
+</div>
 {% else %}
 <div class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
         <div class="bg-white rounded-lg shadow-2xl w-11/12 max-w-md p-6 space-y-4"

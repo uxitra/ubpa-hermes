@@ -1,0 +1,9 @@
+{% if applicants.is_empty() %}
+<p>There arent any applicants if you think this is a bug please report it</p>
+{% else %}
+<ul>
+    {% for applicant in applicants %}
+    <li>{{ applicant }}</li>
+    {% endfor %}
+</ul>
+{% endif %}

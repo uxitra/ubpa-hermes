@@ -4,16 +4,20 @@ mod close_popup;
 mod home;
 mod load;
 mod login;
+mod login_admin;
 mod privacy;
 mod templates;
 mod view_status;
+mod view_status_admin;
 
 use crate::close_popup::close_modal;
 use crate::home::home;
 use crate::load::load;
 use crate::login::login;
+use crate::login_admin::login_admin;
 use crate::privacy::privacy;
 use crate::view_status::view_status;
+use crate::view_status_admin::view_status_admin;
 use actix_files as fs;
 use actix_multipart::form::tempfile::TempFileConfig;
 use actix_web::web::PayloadConfig;
@@ -92,6 +96,8 @@ async fn main() -> std::io::Result<()> {
             .route("/login", web::get().to(login))
             .route("/view-status", web::post().to(view_status))
             .route("/home", web::get().to(home))
+            .route("/login_admin", web::get().to(login_admin))
+            .route("/view-status-admin", web::post().to(view_status_admin))
             .default_service(
                 web::get()
                     .to(|| async { fs::NamedFile::open_async("./static/html/index.html").await }),
