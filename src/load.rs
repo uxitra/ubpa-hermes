@@ -102,6 +102,7 @@ pub async fn load(
     // Get the value of the checkbox
     let checkbox_value = form.checkbox.as_ref().map(|t| t.0 == "on").unwrap_or(false);
 
+    // If the checkbox isnt checked it returns an error
     if !checkbox_value {
         return Ok(UploadTemplate {
             error: "you need to agree to the Nutzerbedingungen",
