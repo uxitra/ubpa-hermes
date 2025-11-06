@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
-use crate::state::State;
-use actix_web::{HttpResponse, Responder, web};
+use crate::dashboard;
+use crate::send_email;
+use actix_web::{Responder, web};
 use serde::Deserialize;
 use sqlx::Row;
 use sqlx::SqlitePool;
@@ -13,13 +12,15 @@ pub struct ChangeStateForm {
     pub key: String,
 }
 
+/// Change the state of an applicant
 pub async fn change_state(
     form: web::Form<ChangeStateForm>,
     pool: actix_web::web::Data<SqlitePool>,
 ) -> Result<impl Responder, actix_web::Error> {
     let key = &form.key;
 
-    let row = sqlx::query("SELECT state FROM applicants WHERE key = ?")
+    // get the state and the email
+    let row = sqlx::query("SELECT state, value FROM applicants WHERE key = ?")
         .bind(key)
         .fetch_optional(pool.get_ref())
         .await;
@@ -27,7 +28,12 @@ pub async fn change_state(
     match row {
         Ok(Some(row)) => {
             let state: i32 = row.get("state");
+            let value: String = row.get("value");
 
+            // Send an email to the email we got from the db
+            send_email::send_email(value);
+
+            // Change the state
             if state == 1 {
                 let _result = sqlx::query("UPDATE applicants SET state = ? WHERE key = ?")
                     .bind(2)
@@ -55,37 +61,6 @@ pub async fn change_state(
         }
     }
 
-    let mut users = HashMap::new();
-
-    let rows = sqlx::query("SELECT key, value, state, created_at FROM applicants")
-        .fetch_all(pool.get_ref())
-        .await
-        .unwrap();
-
-    for row in rows {
-        let key: String = row.get("key");
-        let value: String = row.get("value");
-        let state: i32 = row.get("state");
-        let created_at: String = row.get("created_at");
-
-        let user_created_at: chrono::NaiveDateTime =
-            chrono::NaiveDateTime::parse_from_str(created_at.as_str(), "%Y-%m-%d %H:%M:%S")
-                .unwrap();
-
-        let real_state = match state {
-            1 => State::Fresh,
-            2 => State::Old,
-            _ => State::None,
-        };
-
-        let user = format!(
-            "{},  {}  state: {},  created at: {}",
-            key, value, real_state, user_created_at
-        );
-        users.insert(key, user);
-    }
-
-    Ok(AdminDashboardTemplate {
-        applicants: users.into_iter().collect::<Vec<_>>(),
-    })
+    // Return the admin dashboard that is now recalculated
+    dashboard::dashboard(pool.as_ref()).await
 }

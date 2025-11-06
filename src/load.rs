@@ -1,21 +1,13 @@
 use crate::check_email::is_valid_email;
 use crate::check_pdf::detect_pdf;
+use crate::send_email;
 use crate::templates::upload_template::UploadTemplate;
 use actix_multipart::form::MultipartForm;
 use actix_multipart::form::bytes::Bytes;
 use actix_multipart::form::text::Text;
 use actix_web::Error;
 use actix_web::Responder;
-use lettre::Transport;
 use sqlx::SqlitePool;
-
-#[derive(serde::Deserialize)]
-struct EmailConfig {
-    email: String,
-    password: String,
-    subject: String,
-    email_content: String,
-}
 
 #[derive(Debug, MultipartForm)]
 /// Contains all the variables that are send to the backend from the html form
@@ -135,35 +127,8 @@ pub async fn load(
         .unwrap();
     println!("{}, {}, {}", token, &email, state);
 
-    // Load the config
-    let config_data = std::fs::read_to_string("./config.json")
-        .expect("Failed to read config.json please check if the file was suplied (the progrma doesnt automatically create it) check ");
-    let config: EmailConfig = serde_json::from_str(&config_data).expect("Failed to parse JSON");
-
-    // Create the email
-    let lettre_email = lettre::Message::builder()
-        .from(config.email.parse().unwrap())
-        .to(email.parse().unwrap())
-        .subject(config.subject)
-        .body(config.email_content)
-        .unwrap();
-
-    let creds = lettre::transport::smtp::authentication::Credentials::new(
-        config.email.clone(),
-        config.password.clone(),
-    );
-
-    // Create email mailer
-    let mailer = lettre::SmtpTransport::relay("smtp.web.de")
-        .unwrap()
-        .credentials(creds)
-        .build();
-
-    // Send email to given email adress
-    match mailer.send(&lettre_email) {
-        Ok(_) => println!("Email sent successfully!"),
-        Err(e) => println!("Could not send email: {}", e),
-    }
+    // Send an email
+    send_email::send_email(email);
 
     // If succesfull return nothing
     Ok(UploadTemplate {

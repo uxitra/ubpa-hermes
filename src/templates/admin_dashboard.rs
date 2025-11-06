@@ -1,6 +1,5 @@
 use askama::Template;
 use askama_web::WebTemplate;
-use std::collections::HashMap;
 
 #[derive(Template, WebTemplate)]
 #[template(path = "dashboard.html")]

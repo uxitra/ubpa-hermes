@@ -8,6 +8,7 @@ pub struct LoginForm {
     pub email: String,
 }
 
+/// Get the state of the current user
 pub async fn view_status(
     form: actix_web::web::Form<LoginForm>,
     pool: actix_web::web::Data<SqlitePool>,

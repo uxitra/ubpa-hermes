@@ -2,11 +2,14 @@ mod change_state;
 mod check_email;
 mod check_pdf;
 mod close_popup;
+mod dashboard;
 mod home;
 mod load;
 mod login;
 mod login_admin;
 mod privacy;
+mod remove_state;
+mod send_email;
 mod state;
 mod templates;
 mod view_status;
@@ -19,6 +22,7 @@ use crate::load::load;
 use crate::login::login;
 use crate::login_admin::login_admin;
 use crate::privacy::privacy;
+use crate::remove_state::remove_state;
 use crate::view_status::view_status;
 use crate::view_status_admin::view_status_admin;
 use actix_files as fs;
@@ -31,14 +35,18 @@ use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::{Row, Sqlite, SqlitePool};
 use tokio::time::{Duration, interval};
 
+/// Runs every 24 hours on a background thread
 pub async fn background_worker(pool: SqlitePool) {
     let mut ticker = interval(Duration::from_hours(24));
 
     loop {
         ticker.tick().await;
         println!("Running scheduled task...");
+
+        // Get current time as UTC
         let current_time = Local::now().naive_local();
 
+        // Get the rows
         let rows = sqlx::query("SELECT key, value, state, created_at FROM applicants")
             .fetch_all(&pool)
             .await
@@ -54,9 +62,11 @@ pub async fn background_worker(pool: SqlitePool) {
 
             let duration_in_db = current_time - user_created_at;
 
+            // If the duration equals one day and the state is 'fresh' it will be set to 'old'
             if duration_in_db.num_days() == 1 && state == 1 {
                 let new_state = state + 1;
 
+                // Update the state in the db
                 sqlx::query("UPDATE applicants SET state = ? WHERE key = ?")
                     .bind(new_state)
                     .bind(key)
@@ -72,10 +82,44 @@ pub async fn background_worker(pool: SqlitePool) {
 async fn main() -> std::io::Result<()> {
     let db_path = "sqlite:data/data.db";
 
+    // Create data directory if not existing
     std::fs::create_dir_all("./data")?;
 
+    let config_path = std::path::Path::new("config.json");
+
+    // Check if config file does exist
+    if !config_path.exists() {
+        panic!(
+            r#"The Program needs a config file for sending emails if the file doesnt exist the program will panic later! 
+            Please create an config file (hint: there is a example config file)"#
+        )
+    }
+
+    // Check if enviroment variables exist
+    match std::env::var("ADMIN_USERNAME") {
+        Ok(_) => {}
+        Err(e) => {
+            eprint!("{}", e);
+            panic!(
+                "Could not find enviroment variable 'ADMIN_USERNAME' which is crucial for the admin dashboard"
+            )
+        }
+    }
+
+    match std::env::var("ADMIN_PASSWORD") {
+        Ok(_) => {}
+        Err(e) => {
+            eprint!("{}", e);
+            panic!(
+                "Could not find enviroment variable 'ADMIN_PASSWORD' which is crucial for the admin dashboard"
+            )
+        }
+    }
+
+    // Check if the database exists
     let db_exists = Sqlite::database_exists(db_path).await.unwrap();
 
+    // If the database wasnt created create it
     if !db_exists {
         match Sqlite::create_database(db_path).await {
             Ok(_) => println!("Created database"),
@@ -83,12 +127,14 @@ async fn main() -> std::io::Result<()> {
         }
     }
 
+    // Create a connection pool
     let pool = SqlitePoolOptions::new()
         .max_connections(5)
         .connect(db_path)
         .await
         .expect("Failed to create conection to the database");
 
+    // If this is the first time the db starts create table
     if !db_exists {
         println!("Database not found, creating new one...");
         sqlx::query(
@@ -109,8 +155,10 @@ async fn main() -> std::io::Result<()> {
         println!("Database already exists, skipping table creation.");
     }
 
+    // Create an upload directory for uploaded files
     std::fs::create_dir_all("./upload")?;
 
+    // Spawn the background worker
     tokio::spawn(background_worker(pool.clone()));
 
     println!("Server running at http://127.0.0.1:8080");
@@ -135,6 +183,7 @@ async fn main() -> std::io::Result<()> {
             .route("/login_admin", web::get().to(login_admin))
             .route("/view-status-admin", web::post().to(view_status_admin))
             .route("/change_state", web::post().to(change_state))
+            .route("/remove_state", web::post().to(remove_state))
             .default_service(
                 web::get()
                     .to(|| async { fs::NamedFile::open_async("./static/html/index.html").await }),
