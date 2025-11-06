@@ -126,7 +126,7 @@ pub async fn load(
     let state = 1;
 
     // Insert applicant information into db
-    sqlx::query(r#"INSERT INTO users (key, value, state) VALUES (?, ?, ?)"#)
+    sqlx::query(r#"INSERT INTO applicants (key, value, state) VALUES (?, ?, ?)"#)
         .bind(token.to_string())
         .bind(&email)
         .bind(state)

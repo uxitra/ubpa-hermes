@@ -24,7 +24,7 @@ pub async fn view_status_admin(
     if form.username == "admin" && form.password == "12345" {
         let pool = pool.get_ref();
 
-        let rows = sqlx::query("SELECT key, value, state, created_at FROM users")
+        let rows = sqlx::query("SELECT key, value, state, created_at FROM aplicants")
             .fetch_all(pool)
             .await
             .unwrap();

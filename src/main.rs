@@ -55,7 +55,7 @@ pub async fn background_worker(pool: SqlitePool) {
             if duration_in_db.num_days() == 1 && state == 1 {
                 let new_state = state + 1;
 
-                sqlx::query("UPDATE users SET state = ? WHERE key = ?")
+                sqlx::query("UPDATE applicants SET state = ? WHERE key = ?")
                     .bind(new_state)
                     .bind(key)
                     .execute(&pool)
@@ -91,7 +91,7 @@ async fn main() -> std::io::Result<()> {
         println!("Database not found, creating new one...");
         sqlx::query(
             r#"
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS applicants (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL,
                 state INT NOT NULL,

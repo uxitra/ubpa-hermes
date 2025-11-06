@@ -14,7 +14,7 @@ pub async fn view_status(
 ) -> Result<impl actix_web::Responder, actix_web::Error> {
     println!("{}", form.email);
     println!("{}", form.token);
-    let row = sqlx::query("SELECT key, value, state FROM users WHERE key = ? AND value = ?")
+    let row = sqlx::query("SELECT key, value, state FROM applicants WHERE key = ? AND value = ?")
         .bind(&form.token)
         .bind(&form.email)
         .fetch_optional(pool.as_ref())
