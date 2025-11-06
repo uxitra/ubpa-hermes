@@ -6,6 +6,7 @@ mod load;
 mod login;
 mod login_admin;
 mod privacy;
+mod state;
 mod templates;
 mod view_status;
 mod view_status_admin;
@@ -22,19 +23,48 @@ use actix_files as fs;
 use actix_multipart::form::tempfile::TempFileConfig;
 use actix_web::web::PayloadConfig;
 use actix_web::{App, HttpServer, web};
-use sqlx::Sqlite;
+use chrono::Local;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::{Row, Sqlite, SqlitePool};
+use tokio::time::{Duration, interval};
 
-// Refactor the html kind so that index.html only is full of containers and containers get inplaced by templates so everything is structured clearly and reusable
+pub async fn background_worker(pool: SqlitePool) {
+    let mut ticker = interval(Duration::from_hours(24));
 
-// <div> // only containers in index.html
-// |
-// |
-// Templates place their html into the containers.
-// templates that have placed a new body before now just insert into a div and can now still print into other divs
+    loop {
+        ticker.tick().await;
+        println!("Running scheduled task...");
+        let current_time = Local::now().naive_local();
 
-// build like main page but instead of containing main page form contain template after request
+        let rows = sqlx::query("SELECT key, value, state, created_at FROM users")
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+
+        for row in rows {
+            let key: String = row.get("key");
+            let created_at: String = row.get("created_at");
+            let state: i32 = row.get("state");
+            let user_created_at: chrono::NaiveDateTime =
+                chrono::NaiveDateTime::parse_from_str(created_at.as_str(), "%Y-%m-%d %H:%M:%S")
+                    .unwrap();
+
+            let duration_in_db = current_time - user_created_at;
+
+            if duration_in_db.num_days() == 1 && state == 1 {
+                let new_state = state + 1;
+
+                sqlx::query("UPDATE users SET state = ? WHERE key = ?")
+                    .bind(new_state)
+                    .bind(key)
+                    .execute(&pool)
+                    .await
+                    .unwrap();
+            }
+        }
+    }
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -63,7 +93,9 @@ async fn main() -> std::io::Result<()> {
             r#"
             CREATE TABLE IF NOT EXISTS users (
                 key TEXT PRIMARY KEY,
-                value TEXT NOT NULL
+                value TEXT NOT NULL,
+                state INT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
             "#,
         )
@@ -76,6 +108,8 @@ async fn main() -> std::io::Result<()> {
     }
 
     std::fs::create_dir_all("./upload")?;
+
+    tokio::spawn(background_worker(pool.clone()));
 
     println!("Server running at http://127.0.0.1:8080");
 

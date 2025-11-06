@@ -6,4 +6,5 @@ use askama_web::WebTemplate;
 /// Askama template struct representing the upload.html file
 pub struct StatusTemplate<'a> {
     pub error: &'a str,
+    pub state: &'a str,
 }

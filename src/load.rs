@@ -117,23 +117,30 @@ pub async fn load(
         });
     }
 
+    // Create Uuid v4 unique token
     let token = uuid::Uuid::new_v4();
     println!("{}", token);
 
     let email = email.unwrap().to_string();
 
-    sqlx::query(r#"INSERT INTO users (key, value) VALUES (?, ?)"#)
+    let state = 1;
+
+    // Insert applicant information into db
+    sqlx::query(r#"INSERT INTO users (key, value, state) VALUES (?, ?, ?)"#)
         .bind(token.to_string())
         .bind(&email)
+        .bind(state)
         .execute(pool.as_ref())
         .await
         .unwrap();
-    println!("{}, {}", token, &email);
+    println!("{}, {}, {}", token, &email, state);
 
+    // Load the config
     let config_data = std::fs::read_to_string("./config.json")
-        .expect("Failed to read config.json please check if the file was suplied");
+        .expect("Failed to read config.json please check if the file was suplied (the progrma doesnt automatically create it) check ");
     let config: EmailConfig = serde_json::from_str(&config_data).expect("Failed to parse JSON");
 
+    // Create the email
     let lettre_email = lettre::Message::builder()
         .from(config.email.parse().unwrap())
         .to(email.parse().unwrap())
@@ -146,11 +153,13 @@ pub async fn load(
         config.password.clone(),
     );
 
-    let mailer = lettre::SmtpTransport::relay("smtp.gmail.com")
+    // Create email mailer
+    let mailer = lettre::SmtpTransport::relay("smtp.web.de")
         .unwrap()
         .credentials(creds)
         .build();
 
+    // Send email to given email adress
     match mailer.send(&lettre_email) {
         Ok(_) => println!("Email sent successfully!"),
         Err(e) => println!("Could not send email: {}", e),

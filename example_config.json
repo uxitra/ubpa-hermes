@@ -1,0 +1,6 @@
+{
+    "email": "",
+    "password": "",
+    "subject": "Test",
+    "email_content": "Hello test from rust"
+}
