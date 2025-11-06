@@ -6,6 +6,7 @@ mod close_popup;
 mod dashboard;
 mod home;
 mod load;
+mod load_config;
 mod login;
 mod login_admin;
 mod privacy;
@@ -51,6 +52,8 @@ async fn main() -> std::io::Result<()> {
             Please create an config file (hint: there is a example config file)"#
         )
     }
+
+    let config = load_config::load_config().await;
 
     // Check if enviroment variables exist
     match std::env::var("ADMIN_USERNAME") {
@@ -127,6 +130,7 @@ async fn main() -> std::io::Result<()> {
             // Set the location for temporary files
             .app_data(TempFileConfig::default().directory("./upload"))
             .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(config.clone()))
             // Serve everything under /static/
             .service(fs::Files::new("/html/", "./static/html/").prefer_utf8(true))
             .service(fs::Files::new("/js/", "./static/js/").show_files_listing())

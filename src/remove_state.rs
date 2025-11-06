@@ -4,6 +4,7 @@ use sqlx::SqlitePool;
 
 use crate::change_state::ChangeStateForm;
 use crate::dashboard;
+use crate::send_email::EmailConfig;
 use crate::send_email::send_email;
 use crate::templates::admin_dashboard::AdminDashboardTemplate;
 
@@ -11,6 +12,7 @@ use crate::templates::admin_dashboard::AdminDashboardTemplate;
 pub async fn remove_state(
     form: web::Form<ChangeStateForm>,
     pool: actix_web::web::Data<SqlitePool>,
+    config: actix_web::web::Data<EmailConfig>,
 ) -> Result<impl Responder, actix_web::Error> {
     let key = &form.key;
 
@@ -24,7 +26,7 @@ pub async fn remove_state(
         Ok(Some(record)) => {
             let value: String = record.get("value");
             // Create the email
-            send_email(value);
+            send_email(value, config.get_ref());
         }
         Ok(None) => {}
         Err(err) => {

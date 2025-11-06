@@ -1,6 +1,7 @@
 use crate::check_email::is_valid_email;
 use crate::check_pdf::detect_pdf;
 use crate::send_email;
+use crate::send_email::EmailConfig;
 use crate::templates::upload_template::UploadTemplate;
 use actix_multipart::form::MultipartForm;
 use actix_multipart::form::bytes::Bytes;
@@ -24,6 +25,7 @@ pub struct UploadForm {
 pub async fn load(
     MultipartForm(form): MultipartForm<UploadForm>,
     pool: actix_web::web::Data<SqlitePool>,
+    config: actix_web::web::Data<EmailConfig>,
 ) -> Result<impl Responder, Error> {
     // Check if they arent files sended
     if form.files.is_empty() {
@@ -129,7 +131,7 @@ pub async fn load(
     println!("{}, {}, {}", token, &email, state);
 
     // Send an email
-    send_email::send_email(email);
+    send_email::send_email(email, config.get_ref());
 
     // If succesfull return nothing
     Ok(UploadTemplate {

@@ -1,5 +1,6 @@
 use crate::dashboard;
 use crate::send_email;
+use crate::send_email::EmailConfig;
 use actix_web::{Responder, web};
 use serde::Deserialize;
 use sqlx::Row;
@@ -16,6 +17,7 @@ pub struct ChangeStateForm {
 pub async fn change_state(
     form: web::Form<ChangeStateForm>,
     pool: actix_web::web::Data<SqlitePool>,
+    config: actix_web::web::Data<EmailConfig>,
 ) -> Result<impl Responder, actix_web::Error> {
     let key = &form.key;
 
@@ -31,7 +33,7 @@ pub async fn change_state(
             let value: String = row.get("value");
 
             // Send an email to the email we got from the db
-            send_email::send_email(value);
+            send_email::send_email(value, config.get_ref());
 
             // Change the state
             if state == 1 {
