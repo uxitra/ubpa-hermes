@@ -1,23 +1,50 @@
-# Setup
+# Setup Guide
 
-To get started, install Rust by following the official instructions at  
-https://rust-lang.org/tools/install/
+## 1. Install Docker
 
-Then, Clone the repository:
+Make sure [Docker](https://docs.docker.com/get-started/get-docker/) is installed on the system
+
+You can check if docker is already installed by running:
+
+```
+sudo docker ps
+```
+
+## 2. Clone the repository
 
 ```bash
 git clone https://github.com/uxitra/ubpa-hermes.git
 ```
 
-Most folders and files are created automatically when you first build or run the project.
-However, there is one important exception — the configuration file.
+# 3. Build the Docker image
 
-The configuration file (config.json) contains critical information such as the sender email address and password, which are required for sending emails from Rust.
+build the image using the included `Dockerfile`
 
-An example configuration can be found in the project root.
-You can copy it and adjust the values to match your setup.
+```bash
+sudo docker build -t ubpa-hermes:latest .
+```
 
-Example config.json:
+If the build completes successfully, you’re ready to start the service.
+
+## 4. Run the application
+
+Use Docker Compose to start the required container:
+
+```bash
+sudo docker compose up
+```
+
+Most directories and files will be automatically created during the first build or run.
+
+## Configuration
+
+One important exception is the configuration file, config.json.
+This file contains essential settings such as the sender’s email address and password — required for the Rust backend to send emails.
+
+An example configuration file (`config.example.json`) is provided in the project root.
+Copy it to `config.json` and adjust the values for your environment.
+
+**Example**:
 
 ```json
 {
@@ -31,3 +58,5 @@ Example config.json:
   "changed_state": ""
 }
 ```
+
+once configured, your environment is ready — the application should now be running through Docker!
