@@ -12,6 +12,6 @@ Detailed installation and setup instructions can be found in the [**Setup Guide*
 
 ### Third-Party Licenses
 
-A complete list of third-party dependencies and their licenses is available under [**Licenses**](/THIRD-PARTY-LICENSES.html).
+A complete list of third-party dependencies and their licenses is available under [**Licenses**](/sbom.md).
 
 ---
